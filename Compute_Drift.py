@@ -76,7 +76,7 @@ def compute_drift(reference_files, recent_files, short="msl"):
         "mean_ac_change":     float(np.nanmean(ac_change)),
         # persistence-vs-variance contrast, the paper-correct signal:
         "ac_ref_field":       ac_ref,
-        "ac_recent_field":    ac_recent,
+        #"ac_recent_field":    ac_recent,
         "ac_change_field":    ac_change,
         "drift_field":        drift_pct,
     }

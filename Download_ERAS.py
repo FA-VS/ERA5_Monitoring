@@ -12,7 +12,7 @@ AREA = [60, -10, 40, 20]
 #     "eval":  list(range(2020, 2025)),
 # }
 PERIODS = {
-     "1950s": list(range(1950, 1960)),
+    "1950s": list(range(1950, 1960)),
     "1960s": list(range(1960, 1970)),
     "1970s": list(range(1970, 1980)),
     "1980s": list(range(1980, 1990)),
