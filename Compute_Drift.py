@@ -65,7 +65,9 @@ def compute_drift(reference_files, recent_files, short="msl"):
     rmse_recent = eval_gradient(recent_coeffs, recent)
     drift_pct = 100.0 * (rmse_frozen - rmse_recent) / rmse_recent
 
-    ac_change = lag1_autocorr(recent) - lag1_autocorr(ref)
+    ac_ref = lag1_autocorr(ref)
+    ac_recent = lag1_autocorr(recent)
+    ac_change = ac_recent - ac_ref
 
     return {
         "mean_drift_pct":     float(np.nanmean(drift_pct)),
@@ -73,6 +75,8 @@ def compute_drift(reference_files, recent_files, short="msl"):
         "mean_rmse_frozen":   float(np.nanmean(rmse_frozen)),
         "mean_ac_change":     float(np.nanmean(ac_change)),
         # persistence-vs-variance contrast, the paper-correct signal:
+        "ac_ref_field":       ac_ref,
+        "ac_recent_field":    ac_recent,
         "ac_change_field":    ac_change,
         "drift_field":        drift_pct,
     }
