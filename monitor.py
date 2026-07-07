@@ -6,11 +6,25 @@ from MLflow_Monitoring import monitoring_run
 from Compute_Drift import compute_drift
 
 def fetch_recent(months=12, out_dir="data/recent", area=None, grid=None):
+    #TODO: This needs A LOT of work
+    # - Check what is already present to avoid redownloads (requires new naming convention)
+    # - Make as few calls to CDS as possible to download what is missing
+    # - Prune old files from data/recent
     import cdsapi, glob, os
     from datetime import date, timedelta
 
+    # ERA5 single-level dataset. MSLP + 2m temperature.
+    # Note: 1950-1978 lives in the "preliminary back extension"; from 1979 on
+    # it's the main ERA5 stream. The CDS now serves both under the same
+    # dataset name, but double-check the current dataset id on the CDS docs.
+    DATASET = "reanalysis-era5-single-levels"
+    VARIABLES = ["mean_sea_level_pressure", "2m_temperature"]
+
+    # Geographic area and precision
     area = area or [60, -10, 40, 20]     # Western Europe [N, W, S, E]
-    grid = grid or [1.0, 1.0]
+    grid = grid or [1.0, 1.0] # Default in ERAS is [0.25,0.25], i.e. more precise
+    timestamps = ["00:00", "06:00", "12:00", "18:00"] # Will be averaged out daily
+
     os.makedirs(out_dir, exist_ok=True)
 
     end = date.today() - timedelta(days=6)   # ERA5T latency guard
@@ -44,11 +58,11 @@ def fetch_recent(months=12, out_dir="data/recent", area=None, grid=None):
             days = [f"{d:02d}" for d in range(1, 32)]   # CDS ignores invalid days
 
         client.retrieve(
-            "reanalysis-era5-single-levels",
+            DATASET,
             {"product_type": "reanalysis",
-             "variable": ["mean_sea_level_pressure", "2m_temperature"],
-             "year": f"{yy}", "month": f"{mm:02d}", "day": days,
-             "time": ["00:00", "06:00", "12:00", "18:00"],
+             "variable": VARIABLES,
+             "year": f"{yy}", "month": f"{mm:02d}", "day": days, # Cartesian product, must be careful here
+             "time": timestamps,
              "area": area, "grid": grid, "format": "netcdf"},
             target)
 
