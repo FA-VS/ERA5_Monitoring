@@ -17,8 +17,8 @@ on:
       drift_threshold:
         default: '1.0'
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}:latest
+#env:
+#  IMAGE: ghcr.io/${{ github.repository }}:latest
 
 jobs:
   # ── Build & push the image, but only on code/data changes ──────────
@@ -31,6 +31,8 @@ jobs:
       packages: write            # needed to push to GHCR
     steps:
       - uses: actions/checkout@v4
+      - name: Set lowercase image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
 
       - uses: docker/login-action@v3
         with:
@@ -38,14 +40,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}   # automatic, no setup needed
 
-            #      - uses: docker/setup-buildx-action@v3
+#      - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ env.IMAGE }}
-            #          cache-from: type=gha    # layer caching → fast rebuilds
-            #          cache-to: type=gha,mode=max
+#          cache-from: type=gha    # layer caching → fast rebuilds
+#          cache-to: type=gha,mode=max
 
   # ── Run the monitor ────────────────────────────────────────────────
   monitor:
@@ -57,6 +59,9 @@ jobs:
       contents: read
       packages: read             # needed to pull from GHCR
     steps:
+      - name: Set lowercase image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
+
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
