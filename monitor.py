@@ -94,26 +94,27 @@ def fetch_recent_year(year = 2025, out_dir="data/recent", area=None, grid=None):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--reference-glob", default="data/reference/*.nc")
-    #p.add_argument("--recent-days", type=int, default=365)
-    p.add_argument("--recent-months", type=int, default=3) #TODO: Should be exactly one year!!
-    p.add_argument("--drift-threshold", type=float, default=1.0) #TODO: Update!!!
+    #p.add_argument("--recent-months", type=int, default=3) #TODO: Should be exactly one year!!
+    p.add_argument("--recent-year", type=int, default=2025)
+    p.add_argument("--drift-threshold", type=float, default=1.0) #TODO: Update!!! Have to find a sane number.
     p.add_argument("--fetch", action="store_true")
-    a = p.parse_args()
+    args = p.parse_args()
 
-    ref = sorted(glob.glob(a.reference_glob))
-    #recent = fetch_recent(a.recent_days) if a.fetch \
-    recent = fetch_recent_year(2025) if a.fetch \
+    ref = sorted(glob.glob(args.reference_glob))
+    #recent = fetch_recent(args.recent_months) if args.fetch \
+    recent = fetch_recent_year(args.recent_year) if args.fetch \
              else sorted(glob.glob("data/recent/*.nc"))
 
     mlflow.set_experiment("era5_drift_monitor")
     with mlflow.start_run():
         results = compute_drift(ref, recent)
-        mlflow.log_params({"reference_glob": a.reference_glob,
-                           "recent_months": a.recent_months})
+        mlflow.log_params({"reference_glob": args.reference_glob,
+                           #"recent_months": args.recent_months})
+                           "recent_year": args.recent_year})
         mlflow.log_metrics({k: v for k, v in results.items()
                             if not k.endswith("_field")})
         drift = results["mean_drift_pct"]
-        alert = drift > a.drift_threshold
+        alert = drift > args.drift_threshold
         mlflow.log_metric("alert_triggered", int(alert))
         print(f"drift={drift:.3f}% threshold={a.drift_threshold} alert={alert}")
         sys.exit(1 if alert else 0)   # non-zero exit = the "raise error" signal
