@@ -116,7 +116,7 @@ def main():
         drift = results["mean_drift_pct"]
         alert = drift > args.drift_threshold
         mlflow.log_metric("alert_triggered", int(alert))
-        print(f"drift={drift:.3f}% threshold={a.drift_threshold} alert={alert}")
+        print(f"drift={drift:.3f}% threshold={args.drift_threshold} alert={alert}")
         sys.exit(1 if alert else 0)   # non-zero exit = the "raise error" signal
 
 
