@@ -107,7 +107,7 @@ def main():
              else sorted(glob.glob(f"data/recent/*.nc"))
 
     mlflow.set_experiment("era5_drift_monitor")
-    with mlflow.start_run(run_name = f"drift_{args.reference-years}_to_{args.recent-year}"):
+    with mlflow.start_run(run_name = f"drift_{args.reference_years}_to_{args.recent_year}"):
         results = compute_drift(ref, recent)
         mlflow.log_params({"reference_glob": args.reference_glob,
                            #"recent_months": args.recent_months})
