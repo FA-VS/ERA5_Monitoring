@@ -94,6 +94,7 @@ def fetch_recent_year(year = 2025, out_dir="data/recent", area=None, grid=None):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--reference-glob", default="data/reference/*.nc")
+    p.add_argument("--reference-years", type=int, default="1950s") #TODO: Make this actually do something
     #p.add_argument("--recent-months", type=int, default=3) #TODO: Should be exactly one year!!
     p.add_argument("--recent-year", type=int, default=2025)
     p.add_argument("--drift-threshold", type=float, default=1.0) #TODO: Update!!! Have to find a sane number.
@@ -106,7 +107,7 @@ def main():
              else sorted(glob.glob("data/recent/*.nc"))
 
     mlflow.set_experiment("era5_drift_monitor")
-    with mlflow.start_run():
+    with mlflow.start_run(run_name = f"drift_{args.reference-years}_to_{args.recent-year}"):
         results = compute_drift(ref, recent)
         mlflow.log_params({"reference_glob": args.reference_glob,
                            #"recent_months": args.recent_months})

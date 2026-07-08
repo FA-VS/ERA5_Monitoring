@@ -26,6 +26,7 @@ jobs:
   # ── Build & push the image, but only on code/data changes ──────────
   build:
     # skip building on the scheduled run — reuse the existing image
+    # TODO: Clean-up / version images, so they don't pile up in github's registry
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     permissions:
@@ -65,7 +66,7 @@ jobs:
       - name: Set lowercase image name
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-north-1
