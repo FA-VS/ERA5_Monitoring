@@ -13,7 +13,9 @@ on:
   workflow_dispatch:             # manual trigger, with changeable reference
     inputs:
       reference_glob:
-        default: 'data/reference/*.nc'
+        default: 'data/reference/*1950s*.nc'
+      reference_years:
+        default: '1950s'
       drift_threshold:
         default: '1.0'
       recent_year:
@@ -94,5 +96,6 @@ jobs:
             ${{ env.IMAGE }} \
             --fetch \
             --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
-            --reference-glob "${{ github.event.inputs.reference_glob || 'data/reference/*.nc' }}" \
+            --reference-glob "${{ github.event.inputs.reference_glob || 'data/reference/*1950s*.nc' }}" \
+            --reference-years "${{ github.event.inputs.reference_years || '1950s' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"

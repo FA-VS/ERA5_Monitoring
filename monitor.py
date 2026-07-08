@@ -1,4 +1,4 @@
-import argparse, sys, glob, os
+emport argparse, sys, glob, os
 
 import mlflow
 
@@ -94,7 +94,7 @@ def fetch_recent_year(year = 2025, out_dir="data/recent", area=None, grid=None):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--reference-glob", default="data/reference/*.nc")
-    p.add_argument("--reference-years", type=int, default="1950s") #TODO: Make this actually do something
+    p.add_argument("--reference-years", default="1950s") #TODO: Make this actually do something later...
     #p.add_argument("--recent-months", type=int, default=3) #TODO: Should be exactly one year!!
     p.add_argument("--recent-year", type=int, default=2025)
     p.add_argument("--drift-threshold", type=float, default=1.0) #TODO: Update!!! Have to find a sane number.
@@ -104,7 +104,7 @@ def main():
     ref = sorted(glob.glob(args.reference_glob))
     #recent = fetch_recent(args.recent_months) if args.fetch \
     recent = fetch_recent_year(args.recent_year) if args.fetch \
-             else sorted(glob.glob("data/recent/*.nc"))
+             else sorted(glob.glob(f"data/recent/*.nc"))
 
     mlflow.set_experiment("era5_drift_monitor")
     with mlflow.start_run(run_name = f"drift_{args.reference-years}_to_{args.recent-year}"):
