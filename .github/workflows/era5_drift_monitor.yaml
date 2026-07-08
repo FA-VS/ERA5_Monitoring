@@ -1,0 +1,78 @@
+name: ERA5 drift monitor
+
+on:
+  push:
+    branches: [main]
+    paths:                       # rebuild only when code or reference data changes
+      - '**.py'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - 'data/reference/**'
+  schedule:
+    - cron: '0 3 1 * *'          # monthly: run the monitor on a regular basis
+  workflow_dispatch:             # manual trigger, with changeable reference
+    inputs:
+      reference_glob:
+        default: 'data/reference/*.nc'
+      drift_threshold:
+        default: '1.0'
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}:latest
+
+jobs:
+  # ── Build & push the image, but only on code/data changes ──────────
+  build:
+    # skip building on the scheduled run — reuse the existing image
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write            # needed to push to GHCR
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # automatic, no setup needed
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}
+          cache-from: type=gha    # layer caching → fast rebuilds
+          cache-to: type=gha,mode=max
+
+  # ── Run the monitor ────────────────────────────────────────────────
+  monitor:
+    needs: build
+    # run if build succeeded, OR on schedule (when build was skipped)
+    if: always() && (needs.build.result == 'success' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read             # needed to pull from GHCR
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: docker pull ${{ env.IMAGE }}
+
+      - name: Run drift monitor
+        env:
+          CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
+          CDSAPI_KEY: ${{ secrets.CDSAPI_KEY }}
+        run: |
+          docker run \
+            -e CDSAPI_URL -e CDSAPI_KEY \
+            ${{ env.IMAGE }} \
+            --fetch \
+            --reference-glob "${{ github.event.inputs.reference_glob || 'data/reference/*.nc' }}" \
+            --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
