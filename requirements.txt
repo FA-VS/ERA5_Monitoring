@@ -7,3 +7,5 @@ mlflow>=3.14
 cdsapi>=0.7
 h5py>=3.16
 dask>=2026.6
+psycopg2-binary
+boto3

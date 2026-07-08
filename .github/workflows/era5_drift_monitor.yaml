@@ -58,11 +58,17 @@ jobs:
     if: always() && (needs.build.result == 'success' || github.event_name == 'schedule')
     runs-on: ubuntu-latest
     permissions:
+      id-token: write           # Needed for AWS??
       contents: read
       packages: read             # needed to pull from GHCR
     steps:
       - name: Set lowercase image name
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-north-1
 
       - uses: docker/login-action@v3
         with:
@@ -77,9 +83,13 @@ jobs:
         env:
           CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
           CDSAPI_KEY: ${{ secrets.CDSAPI_KEY }}
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: |
           docker run \
             -e CDSAPI_URL -e CDSAPI_KEY \
+            -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
+            -e AWS_REGION -e AWS_DEFAULT_REGION \
+            -e MLFLOW_TRACKING_URI \
             ${{ env.IMAGE }} \
             --fetch \
             --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
