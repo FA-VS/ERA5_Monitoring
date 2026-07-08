@@ -102,6 +102,8 @@ def main():
     args = p.parse_args()
 
     ref = sorted(glob.glob(args.reference_glob))
+    ref = [ r for r in ref if args.reference_years in r] # Keep only those matching the reference years (TBF)
+    print(ref) #TEST
     #recent = fetch_recent(args.recent_months) if args.fetch \
     recent = fetch_recent_year(args.recent_year) if args.fetch \
              else sorted(glob.glob(f"data/recent/*.nc"))
