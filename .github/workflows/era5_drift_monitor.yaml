@@ -82,6 +82,6 @@ jobs:
             -e CDSAPI_URL -e CDSAPI_KEY \
             ${{ env.IMAGE }} \
             --fetch \
-            --recent-year "${{ github.event.inputs.recent_year || '2025' }}"
+            --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
             --reference-glob "${{ github.event.inputs.reference_glob || 'data/reference/*.nc' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
