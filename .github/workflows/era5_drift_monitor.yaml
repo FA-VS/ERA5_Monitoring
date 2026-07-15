@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:                       # rebuild only when code or reference data changes
       - '**.py'
+      - '.github/workflows/*.yaml'
       - 'requirements.txt'
       - 'Dockerfile'
   schedule:
@@ -89,10 +90,10 @@ jobs:
             -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
             -e AWS_REGION -e AWS_DEFAULT_REGION \
             -e MLFLOW_TRACKING_URI \
-            -v "${{ github.workspace }}/data:/app/data" \ # Mount repo files
+            -v "${{ github.workspace }}:/app/repo" \ # Mount repo files
             ${{ env.IMAGE }} \
             --fetch \
             --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
-            --reference-glob 'data/reference/*.nc' \
+            --reference-glob 'repo/data/reference/*.nc' \
             --reference-years "${{ github.event.inputs.reference_years || '1950s' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
