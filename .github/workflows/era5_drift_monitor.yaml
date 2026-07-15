@@ -12,8 +12,6 @@ on:
     - cron: '0 3 1 * *'          # monthly: run the monitor on a regular basis
   workflow_dispatch:             # manual trigger, with changeable inputs
     inputs:
-      reference_glob:
-        default: 'data/reference/*.nc'
       reference_years:
         default: '1950s'
       drift_threshold:
@@ -82,6 +80,8 @@ jobs:
       - name: Pull image
         run: docker pull ${{ env.IMAGE }}
 
+      - uses: actions/checkout@v4          # puts repo files on the runner (including reference cds data)
+
       - name: Run drift monitor
         env:
           CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
@@ -93,9 +93,10 @@ jobs:
             -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
             -e AWS_REGION -e AWS_DEFAULT_REGION \
             -e MLFLOW_TRACKING_URI \
+            -v "${{ github.workspace }}/data:/app/data" \ # Mount repo files
             ${{ env.IMAGE }} \
             --fetch \
             --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
-            --reference-glob "${{ github.event.inputs.reference_glob || 'data/reference/*.nc' }}" \
+            --reference-glob 'data/reference/*.nc' \
             --reference-years "${{ github.event.inputs.reference_years || '1950s' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
