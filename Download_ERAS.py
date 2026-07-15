@@ -3,14 +3,18 @@ import cdsapi
 c = cdsapi.Client()
 
 # Western Europe box [N, W, S, E]. Adjust as needed
-AREA = [60, -10, 40, 20]
+AREAS = {
+        "world": [90,-180,-90,180], #ERA5 default
+        "western_europe": [60, -10, 40, 20]
+        }
+AREA_LABELS = AREAS.keys()
 
-# Three periods: two training decades + evaluation window
-# PERIODS = {
-#     "1950s": list(range(1950, 1960)),
-#     "2000s": list(range(2000, 2010)),
-#     "eval":  list(range(2020, 2025)),
-# }
+GRIDS = {
+        "0.25deg" : [0.25, 0.25], #ERA5 default
+        "1deg": [1.0, 1.0]
+        }
+GRID_LABELS = GRIDS.keys()
+
 PERIODS = {
     "1950s": list(range(1950, 1960)),
     "1960s": list(range(1960, 1970)),
@@ -21,6 +25,13 @@ PERIODS = {
     "2010s": list(range(2010, 2020)),
     "eval":  list(range(2020, 2025)),
 }
+PERIOD_LABELS = PERIODS.keys()
+
+TIMESTAMPLISTS = {
+        "1h": [f"{h:02d}:00" for h in range(24)], #ERA5 default
+        "6h": ["00:00", "06:00", "12:00", "18:00"]
+        }
+TIMESTAMP_LABELS = TIMESTAMPLISTS.keys()
 
 # ERA5 single-level dataset. MSLP + 2m temperature.
 # Note: 1950-1978 lives in the "preliminary back extension"; from 1979 on
@@ -29,7 +40,8 @@ PERIODS = {
 DATASET = "reanalysis-era5-single-levels"
 VARIABLES = ["mean_sea_level_pressure", "2m_temperature"]
 
-def request(year):
+
+def era5_request_fullyear(year, area_label, grid_label, timestamp_label):
     return {
         "product_type": "reanalysis",
         "variable": VARIABLES,
@@ -37,15 +49,21 @@ def request(year):
         "month": [f"{m:02d}" for m in range(1, 13)],
         "day": [f"{d:02d}" for d in range(1, 32)],
         # Download just a few times/day, to be averaged daily later.
-        "time": ["00:00", "06:00", "12:00", "18:00"],
-        "area": AREA,
+        "time": TIMESTAMPLISTS[timestamp_label],
+        "area": AREAS[area_label],
         "format": "netcdf",
         # Optional: coarsen to save space/time. Native is 0.25.
-        "grid": [1.0, 1.0],
+        "grid": GRIDS[grid_label],
     }
 
-for label, years in PERIODS.items():
-    for y in years:
-        target = f"era5_{label}_{y}.nc"
-        print("requesting", target)
-        c.retrieve(DATASET, request(y), target)
+def main():
+    area_label = "western_europe"
+    grid_label = "1deg"
+    timestamp_label = "6h"
+
+    for period_label, years in PERIODS.items():
+        for y in years:
+            target = f"era5_{area_label}_{grid_label}_{timestamp_label}_{period_label}_{y}.nc"
+            print("requesting", target)
+            c.retrieve(DATASET, era5_request_fullyear(y, area_label, grid_label, timestamp_label), target)
+

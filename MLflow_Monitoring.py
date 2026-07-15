@@ -31,9 +31,14 @@ def monitoring_run(reference_files, recent_files,
                  or abs(results["mean_ac_change"]) > ac_threshold)
         mlflow.log_metric("alert_triggered", int(alert))
 
-        # optionally persist the drift map as an artifact
-        np.save("drift_field.npy", results["drift_field"])
-        mlflow.log_artifact("drift_field.npy")
+        # optionally persist the (drift) maps as artifacts
+        for k, v in results.items():
+            if k.endswith("_field"):
+                artifact_filename = k+".npy"
+                np.save(artifact_filename, v)
+                mlflow.log_artifact(artifact_filename)
+        #np.save("drift_field.npy", results["drift_field"])
+        #mlflow.log_artifact("drift_field.npy")
 
         if alert:
             print(f"ALERT: drift={results['mean_drift_pct']:.3f}% "
