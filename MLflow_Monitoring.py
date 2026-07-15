@@ -7,40 +7,37 @@ from Compute_Drift import compute_drift
 # or else make sure the values provided are linked to them in some way
 # (as-is, the values are logged without checking their correctness)
 
-def monitoring_run(reference_files, recent_files,
-                   region="western_europe", grid="1deg",
-                   drift_threshold=1.0, ac_threshold=0.05):
-    mlflow.set_experiment("era5_drift_monitor")
-    with mlflow.start_run():
-        # config -> params
-        mlflow.log_params({
-            "region": region, "grid": grid, "model": "gradient_3x3",
-            "n_reference_files": len(reference_files),
-            "n_recent_files": len(recent_files),
-        })
 
-        results = compute_drift(reference_files, recent_files)
+
+def monitoring_run(reference_files,
+                   recent_files,
+                   run_name,
+                   params,
+                   drift_threshold=1.0, ac_threshold=0.05):
+
+    mlflow.set_experiment("era5_drift_monitor")
+    with mlflow.start_run(run_name = run_name):
+        results = compute_drift(ref, recent)
+
+        # config -> params.
+        mlflow.log_params(params)
 
         # metrics (drop the array fields before logging scalars)
-        scalar_metrics = {k: v for k, v in results.items()
-                          if not k.endswith("_field")}
-        mlflow.log_metrics(scalar_metrics)
+        mlflow.log_metrics({k: v for k, v in results.items()
+                            if not k.endswith("_field")})
 
-        # simple, regime-agnostic alert for the minimal version
-        alert = (results["mean_drift_pct"] > drift_threshold
-                 or abs(results["mean_ac_change"]) > ac_threshold)
-        mlflow.log_metric("alert_triggered", int(alert))
-
-        # optionally persist the (drift) maps as artifacts
+        # drift (and other) maps saved as artifacts
         for k, v in results.items():
             if k.endswith("_field"):
                 artifact_filename = k+".npy"
                 np.save(artifact_filename, v)
                 mlflow.log_artifact(artifact_filename)
-        #np.save("drift_field.npy", results["drift_field"])
-        #mlflow.log_artifact("drift_field.npy")
 
-        if alert:
-            print(f"ALERT: drift={results['mean_drift_pct']:.3f}% "
-                  f"ac_change={results['mean_ac_change']:.4f}")
+        # check alert status
+        drift = results["mean_drift_pct"]
+        alert = drift > drift_threshold # or abs(results["mean_ac_change"]) > ac_threshold
+        mlflow.log_metric("alert_triggered", int(alert))
+        print(f"drift={drift:.3f}% threshold={args.drift_threshold} alert={alert}")
+
         return results, alert
+

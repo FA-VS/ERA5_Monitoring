@@ -2,17 +2,10 @@ import argparse, sys, glob, os
 
 import mlflow
 
-from Compute_Drift import compute_drift
 from Download_ERA5 import era5_request_fullyear, DATASET, AREA_LABELS, GRID_LABELS, TIMESTAMP_LABELS
+from MLflow_Monitoring import monitoring_run
 
 PERIOD_LABELS_INREPO = ["1950s", "1980s"]
-
-# ERA5 single-level dataset. MSLP + 2m temperature.
-# Note: 1950-1978 lives in the "preliminary back extension"; from 1979 on
-# it's the main ERA5 stream. The CDS now serves both under the same
-# dataset name, but double-check the current dataset id on the CDS docs.
-
-# Default geographic area and precision is Western Europe, 1.0 instead of 0.25, four timestamps per day
 
 
 def fetch_recent(months=12, out_dir="data/recent", area_label="western_europe", grid_label="1deg", timestamp_label="6h"):
@@ -81,6 +74,8 @@ def fetch_recent_year(year = 2025, out_dir="data/recent", area_label="western_eu
     return [target]
 
 def main():
+
+    # parsing arguments
     p = argparse.ArgumentParser()
     p.add_argument("--reference-glob", default="data/reference/*.nc")
     p.add_argument("--reference-years", default="1950s", choices = PERIOD_LABELS_INREPO)
@@ -93,6 +88,7 @@ def main():
     p.add_argument("--fetch", action="store_true")
     args = p.parse_args()
 
+    # "Fetching" files
     ref = sorted(glob.glob(args.reference_glob))
     ref = [ r for r in ref \
             if f"era5_{args.area_label}_{args.grid_label}_{args.timestamp_label}_{args.reference_years}" in r] # Keep only those matching the reference years (TBF)
@@ -104,35 +100,21 @@ def main():
                                timestamp_label = args.timestamp_label
                                ) if args.fetch else sorted(glob.glob(f"data/recent/*.nc")) # TODO: the "else" part is dangerous...
 
-    mlflow.set_experiment("era5_drift_monitor")
-    with mlflow.start_run(run_name = f"drift_{args.area_label}_{args.grid_label}_{args.reference_years}_to_{args.recent_year}"):
-        results = compute_drift(ref, recent)
+    # Run with MLflow
+    run_name =  f"drift_{args.area_label}_{args.grid_label}_{args.reference_years}_to_{args.recent_year}"
+    # config -> params. TODO: Make sure all of them actually do something...
+    params = {
+            #"reference_glob": args.reference_glob,
+            "reference_years": args.reference_years,
+            #"recent_months": args.recent_months,
+            "recent_year": args.recent_year,
+            "region": args.area_label,
+            "grid": args.grid_label,
+            "timestamps": args.timestamp_label,
+            "model": "gradient_3x3"}
 
-        # config -> params. TODO: Make all of them actually do something, or move this to compute_drift...
-        mlflow.log_params({"reference_glob": args.reference_glob,
-                           "region": args.area_label,
-                           "grid": args.grid_label,
-                           "model": "gradient_3x3",
-                           #"recent_months": args.recent_months})
-                           "recent_year": args.recent_year})
-
-        # metrics (drop the array fields before logging scalars)
-        mlflow.log_metrics({k: v for k, v in results.items()
-                            if not k.endswith("_field")})
-
-        # drift (and other) maps saved as artifacts
-        for k, v in results.items():
-            if k.endswith("_field"):
-                artifact_filename = k+".npy"
-                np.save(artifact_filename, v)
-                mlflow.log_artifact(artifact_filename)
-
-        # check alert status
-        drift = results["mean_drift_pct"]
-        alert = drift > args.drift_threshold # or abs(results["mean_ac_change"]) > ac_threshold
-        mlflow.log_metric("alert_triggered", int(alert))
-        print(f"drift={drift:.3f}% threshold={args.drift_threshold} alert={alert}")
-        sys.exit(1 if alert else 0)   # non-zero exit = the "raise error" signal
+    results, alert = monitoring_run(ref, recent, run_name, params, args.drift_threshold)
+    sys.exit(1 if alert else 0) # Non-zero exit raises an error
 
 
 if __name__ == "__main__":
