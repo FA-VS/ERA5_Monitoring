@@ -37,7 +37,7 @@ def monitoring_run(reference_files,
         drift = results["mean_drift_pct"]
         alert = drift > drift_threshold # or abs(results["mean_ac_change"]) > ac_threshold
         mlflow.log_metric("alert_triggered", int(alert))
-        print(f"drift={drift:.3f}% threshold={args.drift_threshold} alert={alert}")
+        print(f"drift={drift:.3f}% threshold={drift_threshold} alert={alert}")
 
         return results, alert
 

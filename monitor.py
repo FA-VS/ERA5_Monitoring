@@ -90,9 +90,10 @@ def main():
 
     # "Fetching" files
     ref = sorted(glob.glob(args.reference_glob))
+    print("Ref before filtering", ref)
     ref = [ r for r in ref \
             if f"era5_{args.area_label}_{args.grid_label}_{args.timestamp_label}_{args.reference_years}" in r] # Keep only those matching the reference years (TBF)
-    print(ref) #TEST
+    print("Ref after filtering", ref) #TEST
     #recent = fetch_recent(args.recent_months) if args.fetch \
     recent = fetch_recent_year(args.recent_year,
                                area_label = args.area_label,
