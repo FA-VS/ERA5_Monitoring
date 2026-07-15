@@ -79,6 +79,9 @@ jobs:
 
       - uses: actions/checkout@v4          # puts repo files on the runner (including reference cds data)
 
+      - run: echo "IMAGE is '${{ env.IMAGE }}'"
+      - run: ls "${{ github.workspace }}"
+
       - name: Run drift monitor
         env:
           CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
