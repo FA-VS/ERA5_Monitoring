@@ -17,6 +17,8 @@ def monitoring_run(reference_files,
 
     mlflow.set_experiment("era5_drift_monitor")
     with mlflow.start_run(run_name = run_name):
+        print("artifact_uri:", mlflow.get_artifact_uri()) # TEST
+
         results = compute_drift(reference_files, recent_files)
 
         # config -> params.
