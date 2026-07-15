@@ -67,3 +67,6 @@ def main():
             print("requesting", target)
             c.retrieve(DATASET, era5_request_fullyear(y, area_label, grid_label, timestamp_label), target)
 
+if __name__ == "__main__":
+    main()
+
