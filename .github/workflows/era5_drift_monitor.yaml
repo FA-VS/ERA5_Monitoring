@@ -7,7 +7,6 @@ on:
       - '**.py'
       - 'requirements.txt'
       - 'Dockerfile'
-      - 'data/reference/**'
   schedule:
     - cron: '0 3 1 * *'          # monthly: run the monitor on a regular basis
   workflow_dispatch:             # manual trigger, with changeable inputs
@@ -18,9 +17,6 @@ on:
         default: '1.0'
       recent_year:
         default: '2025'
-
-#env:
-#  IMAGE: ghcr.io/${{ github.repository }}:latest
 
 jobs:
   # ── Build & push the image, but only on code/data changes ──────────
