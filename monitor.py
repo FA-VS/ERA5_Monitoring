@@ -2,7 +2,6 @@ import argparse, sys, glob, os
 
 import mlflow
 
-from MLflow_Monitoring import monitoring_run
 from Compute_Drift import compute_drift
 from Download_ERA5 import era5_request_fullyear, DATASET, AREA_LABELS, GRID_LABELS, TIMESTAMP_LABELS
 
