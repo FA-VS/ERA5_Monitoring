@@ -3,10 +3,15 @@ import numpy as np
 
 from Compute_Drift import compute_drift
 
-#TODO: make "region" and "grid" affect the files that get pulled,
-# or else make sure the values provided are linked to them in some way
-# (as-is, the values are logged without checking their correctness)
+MLFLOW_EXP_NAME = "era5_drift_monitor_s3"
+MLFLOW_ARTIFACT_LOCATION = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-artifacts"
 
+def ensure_experiment(name, artifact_location):
+    exp = mlflow.get_experiment_by_name(name)
+    if exp is None:
+        return mlflow.create_experiment(name=name,
+                                        artifact_location=artifact_location)
+    return exp.experiment_id
 
 
 def monitoring_run(reference_files,
@@ -15,8 +20,11 @@ def monitoring_run(reference_files,
                    params,
                    drift_threshold=1.0, ac_threshold=0.05):
 
-    mlflow.set_experiment("era5_drift_monitor")
-    with mlflow.start_run(run_name = run_name):
+    #mlflow.set_experiment("era5_drift_monitor")
+    exp_id = ensure_experiment(MLFLOW_EXP_NAME,
+                               MLFLOW_ARTIFACT_LOCATION)
+
+    with mlflow.start_run(experiment_id = exp_id, run_name = run_name):
         print("artifact_uri:", mlflow.get_artifact_uri()) # TEST
 
         results = compute_drift(reference_files, recent_files)
