@@ -17,7 +17,7 @@ def monitoring_run(reference_files,
 
     mlflow.set_experiment("era5_drift_monitor")
     with mlflow.start_run(run_name = run_name):
-        results = compute_drift(ref, recent)
+        results = compute_drift(reference_files, recent_files)
 
         # config -> params.
         mlflow.log_params(params)
