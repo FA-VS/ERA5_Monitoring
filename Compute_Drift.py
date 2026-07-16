@@ -37,6 +37,7 @@ def eval_gradient(coeffs, evald): # output of fit_gradient, test data
     c, dz, dm = _grad_features(f)
     ct, dzt, dmt = c[:-1], dz[:-1], dm[:-1] # Values at {t} to put into regression formula
     cy = c[1:] # Value at {t+1}, to be predicted
+    # In the following lines, the "None" "tensorizes" the array (kind of like doing coeffs = [coeffs])
     pred = (coeffs[None, :, :, 0]
             + coeffs[None, :, :, 1] * ct
             + coeffs[None, :, :, 2] * dzt
@@ -74,9 +75,9 @@ def compute_drift(reference_files, recent_files, short="msl"):
         "frac_points_positive": float(np.mean(drift_pct > 0)),
         "mean_rmse_frozen":     float(np.nanmean(rmse_frozen)),
         "mean_ac_change":       float(np.nanmean(ac_change)),
-        "reg_coeff_ct_field":   frozen_coeffs[None, :, :, 1],
-        "reg_coeff_dzt_field":  frozen_coeffs[None, :, :, 2],
-        "reg_coeff_dmt_field":  frozen_coeffs[None, :, :, 3],
+        "reg_coeff_ct_field":   frozen_coeffs[:, :, 1],
+        "reg_coeff_dzt_field":  frozen_coeffs[:, :, 2],
+        "reg_coeff_dmt_field":  frozen_coeffs[:, :, 3],
         # persistence-vs-variance contrast, the paper-correct signal:
         "ac_ref_field":         ac_ref,
         #"ac_recent_field":    ac_recent,
