@@ -1,10 +1,11 @@
-import mlflow
+import os
 import numpy as np
+import mlflow
 
 from Compute_Drift import compute_drift
 
 MLFLOW_EXP_NAME = "era5_drift_monitor_s3"
-MLFLOW_ARTIFACT_LOCATION = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-artifacts"
+MLFLOW_ARTIFACT_URI = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-artifacts"
 
 def ensure_experiment(name, artifact_location):
     exp = mlflow.get_experiment_by_name(name)
@@ -22,7 +23,7 @@ def monitoring_run(reference_files,
 
     #mlflow.set_experiment("era5_drift_monitor")
     exp_id = ensure_experiment(MLFLOW_EXP_NAME,
-                               MLFLOW_ARTIFACT_LOCATION)
+                               MLFLOW_ARTIFACT_URI)
 
     with mlflow.start_run(experiment_id = exp_id, run_name = run_name):
         print("artifact_uri:", mlflow.get_artifact_uri()) # TEST
@@ -37,11 +38,16 @@ def monitoring_run(reference_files,
                             if not k.endswith("_field")})
 
         # drift (and other) maps saved as artifacts
+        try:
+            os.mkdir("artifacts")
+        except FileExistsError:
+            pass
         for k, v in results.items():
             if k.endswith("_field"):
-                artifact_filename = k+".npy"
+                artifact_filename = os.path.join("artifacts", k + ".npy")
                 np.save(artifact_filename, v)
                 mlflow.log_artifact(artifact_filename)
+                os.remove(artifact_filename)
 
         # check alert status
         drift = results["mean_drift_pct"]

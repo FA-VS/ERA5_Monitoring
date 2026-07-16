@@ -7,7 +7,7 @@ Based on the paper by Haokun Zhou (arXiv:2511.19638, 2025), we model the daily e
 
 # Components
 
-- sklearn provides the Python library to run the regressions.
+- Linear regressions and array management with numpy (TODO: use sklearn for more advanced analysis).
 - MLflow is used to track the training artifacts and the evaluation metrics, depending on training and evaluation datasets.
 - Neon provides the PostgreSQL database for MLflow to save the training/evaluation metrics.
 - AWS S3 is used to save the training artifacts.

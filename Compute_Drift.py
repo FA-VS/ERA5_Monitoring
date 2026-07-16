@@ -17,7 +17,7 @@ def _grad_features(field):
     return c, dz, dm
 
 def fit_gradient(train): # training data
-    f = train.values #Note that this loads the whole dataset into memory!!!
+    f = train.values #Note that this loads the whole dataset into memory!!! TODO: Avoid overloading memory
     c, dz, dm = _grad_features(f)
     ct, dzt, dmt = c[:-1], dz[:-1], dm[:-1] # Values at {t} to put into regression formula
     cy = c[1:] # Value at {t+1}, to be predicted
@@ -29,7 +29,7 @@ def fit_gradient(train): # training data
         for j in range(nx):
             A = np.column_stack([np.ones(t), ct[:, i, j],
                                  dzt[:, i, j], dmt[:, i, j]])
-            coeffs[i, j], *_ = np.linalg.lstsq(A, cy[:, i, j], rcond=None)
+            coeffs[i, j], *_ = np.linalg.lstsq(A, cy[:, i, j], rcond=None) # Linear regression magic
     return coeffs
 
 def eval_gradient(coeffs, evald): # output of fit_gradient, test data
@@ -70,13 +70,16 @@ def compute_drift(reference_files, recent_files, short="msl"):
     ac_change = ac_recent - ac_ref
 
     return {
-        "mean_drift_pct":     float(np.nanmean(drift_pct)),
+        "mean_drift_pct":       float(np.nanmean(drift_pct)),
         "frac_points_positive": float(np.mean(drift_pct > 0)),
-        "mean_rmse_frozen":   float(np.nanmean(rmse_frozen)),
-        "mean_ac_change":     float(np.nanmean(ac_change)),
+        "mean_rmse_frozen":     float(np.nanmean(rmse_frozen)),
+        "mean_ac_change":       float(np.nanmean(ac_change)),
+        "reg_coeff_ct_field":   frozen_coeffs[None, :, :, 1],
+        "reg_coeff_dzt_field":  frozen_coeffs[None, :, :, 2],
+        "reg_coeff_dmt_field":  frozen_coeffs[None, :, :, 3],
         # persistence-vs-variance contrast, the paper-correct signal:
-        "ac_ref_field":       ac_ref,
+        "ac_ref_field":         ac_ref,
         #"ac_recent_field":    ac_recent,
-        "ac_change_field":    ac_change,
-        "drift_field":        drift_pct,
+        "ac_change_field":      ac_change,
+        "drift_field":          drift_pct,
     }

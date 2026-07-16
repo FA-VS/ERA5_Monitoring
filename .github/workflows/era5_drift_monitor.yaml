@@ -46,7 +46,7 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }}
-          cache-from: type=gha    # layer caching → fast rebuilds
+          cache-from: type=gha    # layer caching -> only rebuild what is necessary (i.e. faster rebuilds)
           cache-to: type=gha,mode=max
 
   # ── Run the monitor ────────────────────────────────────────────────
