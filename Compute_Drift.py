@@ -82,7 +82,7 @@ def compute_drift(reference_files, recent_files, short="msl"):
         "ac_ref_field":         ac_ref,
         #"ac_recent_field":    ac_recent,
         "ac_change_field":      ac_change,
-        #"rmse_frozen_field":    rmse_frozen,
-        #"rmse_recent_field":    rmse_recent,
+        "rmse_frozen_field":    rmse_frozen,
+        "rmse_recent_field":    rmse_recent,
         "drift_field":          drift_pct,
     }
