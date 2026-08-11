@@ -5,7 +5,7 @@ import mlflow
 from Download_ERA5 import era5_request_fullyear, DATASET, AREA_LABELS, GRID_LABELS, TIMESTAMP_LABELS
 from MLflow_Monitoring import monitoring_run
 
-PERIOD_LABELS_INREPO = ["1950s", "1980s"]
+PERIOD_LABELS_INREPO = ["1950s", "1980s", "2000s"]
 
 
 def fetch_recent(months=12, out_dir="data/recent", area_label="western_europe", grid_label="1deg", timestamp_label="6h"):
