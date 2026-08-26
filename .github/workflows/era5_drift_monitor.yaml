@@ -7,7 +7,7 @@ on:
       - '**.py'
       - '.github/workflows/*.yaml'
       - 'requirements.txt'
-      - 'Dockerfile'
+      - 'dockerfile'
   schedule:
     - cron: '0 3 1 * *'          # monthly: run the monitor on a regular basis
   workflow_dispatch:             # manual trigger, with changeable inputs
