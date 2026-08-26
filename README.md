@@ -4,7 +4,6 @@ Simple tool to model atmospheric data around Europe, based on ERA5 data (using M
 
 Based on the paper by Haokun Zhou (arXiv:2511.19638, 2025), we model the daily evolution of MSLP with a linear regression on the pressure and its zonal and meridional gradients. The regression is "trained" on historic data, and its performance on recent data is compared based on the slice of data used for training (e.g. 1950s vs 2000s, applied on 2020s data), to see the drift in the "persistence" of pressure.
 
-
 # Components
 
 - Linear regressions and array management with numpy (TODO: use sklearn for more advanced analysis).
@@ -15,6 +14,8 @@ Based on the paper by Haokun Zhou (arXiv:2511.19638, 2025), we model the daily e
 - Github actions run the training and evaluation automatically, on push and on a schedule, including downloading (new) data from CDS.
 
 There is no always-on mlflow server to track the results. To analyse the resuls, start your own MLflow server locally by connecting to the PostgreSQL URI (you need the account name and password, which are private for now).
+
+For details on how to setup the different elements if you want to use your own database and artifact registry in the github actions, see private_setup.txt
 
 # How to run
 
