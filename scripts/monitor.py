@@ -3,8 +3,8 @@
 import sys
 import glob
 
-from ..download_era5 import build_download_argparse, fetch_recent_year
-from ..mlflow_monitoring import monitoring_run
+from modules.download_era5 import build_download_argparse, fetch_recent_year
+from modules.mlflow_monitoring import monitoring_run
 
 def main(): #pylint: disable=missing-function-docstring
 
