@@ -11,7 +11,7 @@ import os
 import numpy as np
 import mlflow
 
-from compute_drift import compute_drift
+from .compute_drift import compute_drift
 
 MLFLOW_EXP_NAME = "era5_drift_monitor_s3"
 MLFLOW_ARTIFACT_URI = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-artifacts"
