@@ -1,9 +1,9 @@
-# FROM DOCKER HUB, this needs to change?
+# BASE IMAGE FROM DOCKER HUB, this would need to change for production
 FROM python:3.11-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-ENTRYPOINT ["python", "scripts/monitor.py"]
+COPY . /app
+ENTRYPOINT ["python", "-m", "ERA5_Monitoring.scripts.monitor"]
