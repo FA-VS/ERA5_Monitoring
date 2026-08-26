@@ -1,26 +1,59 @@
+"""Module to set up and run MLflow tracking.
+
+Contains global variables relative to MLflow experiment/artifact tracking
+
+Functions:
+    ensure_experiment
+    monitoring_run
+"""
+
 import os
 import numpy as np
 import mlflow
 
-from Compute_Drift import compute_drift
+from compute_drift import compute_drift
 
 MLFLOW_EXP_NAME = "era5_drift_monitor_s3"
 MLFLOW_ARTIFACT_URI = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-artifacts"
 
-def ensure_experiment(name, artifact_location):
+def ensure_experiment(name: str, artifact_location: str) -> int:
+    """Verify if experiment already exists, otherwise create it.
+
+    Args:
+        name: name of the experiment.
+        artifact_location: url or path to artifact registry (only needed for new experiments).
+
+    Returns:
+        MLFlow experiment ID.
+    """
     exp = mlflow.get_experiment_by_name(name)
     if exp is None:
         return mlflow.create_experiment(name=name,
                                         artifact_location=artifact_location)
     return exp.experiment_id
 
+def monitoring_run(reference_files: list[str], #pylint: disable=too-many-arguments,too-many-positional-arguments
+                   recent_files: list[str],
+                   run_name: str,
+                   params: dict[str,str],
+                   drift_threshold: float =1.0,
+                   ac_threshold: float =0.05 # placeholder for now, pylint: disable=unused-argument
+                   ) -> tuple[dict[str,float|np.ndarray],bool]:
 
-def monitoring_run(reference_files,
-                   recent_files,
-                   run_name,
-                   params,
-                   drift_threshold=1.0, ac_threshold=0.05):
+    """Train linear regression, test it on new data, and monitor results via MLFlow.
 
+    Args:
+        reference_files: list of paths to reference ERA5 files
+        recent_files: list of paths to recent ERA5 files
+        run_name: name of evaluation run in MLFlow interface
+        params: dictionary of parameters to be saved in MLFlow
+        drift_threshold: value above which we raise an alert
+        ac_threshold: value above which we raise an alert (UNUSED)
+
+    Returns:
+        Tuple with dictionary with the outputs of compute_drift,
+        and a bool indicating if an alert should be raised.
+    """
     #mlflow.set_experiment("era5_drift_monitor")
     exp_id = ensure_experiment(MLFLOW_EXP_NAME,
                                MLFLOW_ARTIFACT_URI)
@@ -56,4 +89,3 @@ def monitoring_run(reference_files,
         print(f"drift={drift:.3f}% threshold={drift_threshold} alert={alert}")
 
         return results, alert
-

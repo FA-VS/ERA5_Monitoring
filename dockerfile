@@ -6,4 +6,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-ENTRYPOINT ["python", "monitor.py"]
+ENTRYPOINT ["python", "scripts/monitor.py"]
