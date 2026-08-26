@@ -93,7 +93,7 @@ jobs:
             -v "${{ github.workspace }}/data:/app/data" \
             ${{ env.IMAGE }} \
             --fetch \
-            --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
+            --recent-year "${{ github.event.inputs.recent_year || '1985' }}" \
             --reference-glob 'data/reference/*.nc' \
-            --reference-years "${{ github.event.inputs.reference_years || '1950s' }}" \
+            --reference-years "${{ github.event.inputs.reference_years || '1980s' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
