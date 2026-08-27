@@ -3,12 +3,13 @@ name: Build docker image
 on:
   push:
     branches: [main]
-    paths:                       # rebuild only when code or reference data changes
-      - '**.py'
-      - '.github/actions/*/*.yaml'
-      - '.github/workflows/*.yaml'
-      - 'requirements.txt'
-      - 'dockerfile'
+    tags: ['v*']
+      #    paths:                       # rebuild only when code or reference data changes
+      #      - '**.py'
+      #      - '.github/actions/*/*.yaml'
+      #      - '.github/workflows/*.yaml'
+      #      - 'requirements.txt'
+      #      - 'dockerfile'
   workflow_dispatch:             # manual trigger (if needed)
 
 
@@ -31,12 +32,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}   # automatic, no setup needed
 
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha
+
       - uses: docker/setup-buildx-action@v3
+
       - uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha    # layer caching -> only rebuild what is necessary (i.e. faster rebuilds)
           cache-to: type=gha,mode=max
 
