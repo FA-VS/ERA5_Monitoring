@@ -58,6 +58,7 @@ jobs:
         module: [tests.download_era5_1year, tests.run_linear_regression, tests.mlflow_read_write]
     runs-on: ubuntu-latest
     permissions:
+      id-token: write           # Needed for AWS??
       contents: read
       packages: read             # needed to pull from GHCR
     steps:
@@ -100,7 +101,7 @@ jobs:
   monitor:
     needs: build
     # run if build succeeded, OR on schedule (when build was skipped)
-    if: always() && (needs.build.result == 'success' || github.event_name == 'workflow_dispatch')
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       id-token: write           # Needed for AWS??
