@@ -2,8 +2,8 @@ name: Build docker image
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
+      #branches: [main]
       #    paths:                       # rebuild only when code or reference data changes
       #      - '**.py'
       #      - '.github/actions/*/*.yaml'
