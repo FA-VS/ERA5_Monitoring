@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:                       # rebuild only when code or reference data changes
       - '**.py'
-      - '.github/actions/*.yaml'
+      - '.github/actions/*/*.yaml'
       - '.github/workflows/*.yaml'
       - 'requirements.txt'
       - 'dockerfile'

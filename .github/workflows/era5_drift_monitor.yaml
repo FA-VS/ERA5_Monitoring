@@ -42,7 +42,7 @@ jobs:
             ${{ env.IMAGE }} \
             scripts.monitor \
             --fetch \
-            --recent-year "${{ github.event.inputs.recent_year || '1985' }}" \
+            --recent-year "${{ github.event.inputs.recent_year || '2025' }}" \
             --reference-glob 'data/reference/*.nc' \
-            --reference-years "${{ github.event.inputs.reference_years || '1980s' }}" \
+            --reference-years "${{ github.event.inputs.reference_years || '1950s' }}" \
             --drift-threshold "${{ github.event.inputs.drift_threshold || '1.0' }}"
