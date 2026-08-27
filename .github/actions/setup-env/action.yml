@@ -1,0 +1,26 @@
+name: Setup ERA5 monitoring environment / image
+description: Set up AWS credentials, pulls docker image, and git repo files
+runs:
+  using: composite
+  steps:
+    - name: Set lowercase image name
+      run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
+      shell: bash
+
+    - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: eu-north-1
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Pull image
+      run: docker pull ${{ env.IMAGE }}
+      shell: bash
+
+    - uses: actions/checkout@v4          # puts repo files on the runner (including reference cds data), to be mounted
+

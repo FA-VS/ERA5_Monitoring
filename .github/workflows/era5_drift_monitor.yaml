@@ -1,13 +1,6 @@
 name: ERA5 drift monitor
 
 on:
-  push:
-    branches: [main]
-    paths:                       # rebuild only when code or reference data changes
-      - '**.py'
-      - '.github/workflows/*.yaml'
-      - 'requirements.txt'
-      - 'dockerfile'
   schedule:
     - cron: '0 3 1 * *'          # monthly: run the monitor on a regular basis
   workflow_dispatch:             # manual trigger, with changeable inputs
@@ -20,113 +13,15 @@ on:
         default: '2025'
 
 jobs:
-  # ── Build & push the image, but only on code/data changes ──────────
-  build:
-    # TODO: Clean-up / version images, so they don't pile up in github's registry
-    # skip building on the scheduled or dispatched run — reuse the existing image
-    if: github.event_name != 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write            # needed to push to GHCR
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set lowercase image name
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}   # automatic, no setup needed
-
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE }}
-          cache-from: type=gha    # layer caching -> only rebuild what is necessary (i.e. faster rebuilds)
-          cache-to: type=gha,mode=max
-
-  # ── Tests ──────────────────────────────────────────────────────────
-  era5tests:
-    needs: build
-    if: needs.build.result == 'success'
-    strategy:
-      fail-fast: false # if one tests fails, the others still try to complete
-      matrix:
-        module: [tests.download_era5_1year, tests.run_linear_regression, tests.mlflow_read_write]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write           # Needed for AWS??
-      contents: read
-      packages: read             # needed to pull from GHCR
-    steps:
-      - name: Set lowercase image name
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
-
-      - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: eu-north-1
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull image
-        run: docker pull ${{ env.IMAGE }}
-
-      - uses: actions/checkout@v4          # puts repo files on the runner (including reference cds data), to be mounted
-
-      - name: Run test
-        env:
-          CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
-          CDSAPI_KEY: ${{ secrets.CDSAPI_KEY }}
-          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-        run: |
-          docker run \
-          -e CDSAPI_URL -e CDSAPI_KEY \
-          -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN \
-          -e AWS_REGION -e AWS_DEFAULT_REGION \
-          -e MLFLOW_TRACKING_URI \
-          -v "${{ github.workspace }}/data:/app/data" \
-          ${{ env.IMAGE }} \
-          ${{ matrix.module }}
-
-
   # ── Run the monitor ────────────────────────────────────────────────
   monitor:
-    needs: build
-    # run if build succeeded, OR on schedule (when build was skipped)
-    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       id-token: write           # Needed for AWS??
       contents: read
       packages: read             # needed to pull from GHCR
     steps:
-      - name: Set lowercase image name
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:latest" >> "$GITHUB_ENV"
-
-      - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: eu-north-1
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull image
-        run: docker pull ${{ env.IMAGE }}
-
-      - uses: actions/checkout@v4          # puts repo files on the runner (including reference cds data), to be mounted
+      - uses: ./.github/actions/setup-env # Pulls docker image, git code, AWS credentials
 
       - name: Run drift monitor
         env:
