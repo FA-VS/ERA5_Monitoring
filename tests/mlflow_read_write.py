@@ -1,5 +1,6 @@
 """Upload a metric and an artifact via MLflow, then read/download them."""
 
+import os
 import tempfile
 from importlib.resources import files, as_file
 
@@ -19,7 +20,7 @@ def main(): #pylint: disable=missing-function-docstring
     # Upload
     with mlflow.start_run(experiment_id = exp_id, run_name = "github_test") as run:
         run_id = run.info.run_id
-        print("artifact_uri:", mlflow.get_artifact_uri()) # TEST
+        print("artifact_uri:", mlflow.get_artifact_uri())
 
         mlflow.log_param("input1", 1)
         mlflow.log_metric("output1", 1)
@@ -49,8 +50,7 @@ def main(): #pylint: disable=missing-function-docstring
     print("Download complete")
 
     # Clean up
-    mlflow.delete_run(run_id)
-    client.delete_experiment(exp_id)
+    mlflow.delete_run(run_id) # Note: not guaranteed to be complete
     print("Cleanup complete")
 
 if __name__ == "__main__":
