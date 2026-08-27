@@ -52,7 +52,8 @@ jobs:
   # ── Tests ──────────────────────────────────────────────────────────
   era5download:
     needs: build
-    if: always() && (needs.build.result == 'success')
+    if: needs.build.result == 'success'
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read             # needed to pull from GHCR
