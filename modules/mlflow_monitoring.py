@@ -8,6 +8,7 @@ Functions:
 """
 
 import os
+import tempfile
 import numpy as np
 import mlflow
 
@@ -75,12 +76,13 @@ def monitoring_run(reference_files: list[str], #pylint: disable=too-many-argumen
             os.mkdir("artifacts")
         except FileExistsError:
             pass
-        for k, v in results.items():
-            if k.endswith("_field"):
-                artifact_filename = os.path.join("artifacts", k + ".npy")
-                np.save(artifact_filename, v)
-                mlflow.log_artifact(artifact_filename)
-                os.remove(artifact_filename)
+        with tempfile.TemporaryDirectory() as dst:
+            for k, v in results.items():
+                if k.endswith("_field"):
+                    artifact_filename = os.path.join(dst, k + ".npy")
+                    np.save(artifact_filename, v)
+                    mlflow.log_artifact(artifact_filename)
+                    #os.remove(artifact_filename)
 
         # check alert status
         drift = results["mean_drift_pct"]

@@ -12,10 +12,13 @@ Functions:
 import os
 import glob
 import argparse
+from pathlib import Path
 from datetime import date, timedelta
 
 import cdsapi
 c = cdsapi.Client()
+
+DATA_DIR = Path(__file__).parent[1] / "data"
 
 # GLOBAL VARIABLES
 
@@ -80,7 +83,7 @@ def era5_request_fullyear(year: int, area_label: str, grid_label: str, timestamp
 
 def fetch_recent_year(
         year: int = 2025,
-        out_dir: str ="data/recent",
+        out_dir: str = str(DATA_DIR / "recent"),
         area_label: str ="western_europe",
         grid_label: str ="1deg",
         timestamp_label: str ="6h"
@@ -100,7 +103,7 @@ def fetch_recent_year(
 
     os.makedirs(out_dir, exist_ok=True)
 
-    target = f"{out_dir}/era5_{area_label}_{grid_label}_{timestamp_label}_{year}.nc"
+    target = out_dir / f"era5_{area_label}_{grid_label}_{timestamp_label}_{year}.nc"
 
     cdsapi.Client().retrieve(
         DATASET,
@@ -111,7 +114,7 @@ def fetch_recent_year(
 
 def fetch_recent(
         months: int =12,
-        out_dir: str ="data/recent",
+        out_dir: str = str(DATA_DIR / "recent"),
         area_label: str ="western_europe",
         grid_label: str ="1deg",
         timestamp_label: str ="6h"
@@ -179,7 +182,7 @@ def build_download_argparse() -> argparse.ArgumentParser:
 
     # TODO: Clean this up and/or factorize (a bit too closely linked to monitor.py at the moment)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reference-glob", default="data/reference/*.nc")
+    parser.add_argument("--reference-list", default= list( (DATA_DIR / "reference").glob("*.nc") ) )
     parser.add_argument("--reference-years", default="1950s", choices = PERIOD_LABELS_INREPO)
     #parser.add_argument("--recent-months", type=int, default=3) #In practice, should be 12 months (unless we add code to account for seasonality)
     parser.add_argument("--recent-year", type=int, default=2025)
