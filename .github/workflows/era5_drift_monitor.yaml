@@ -82,7 +82,7 @@ jobs:
           -e CDSAPI_URL -e CDSAPI_KEY \
           -v "${{ github.workspace }}/data:/app/data" \
           ${{ env.IMAGE }} \
-          scripts.dowload_era5_1year
+          scripts.download_era5_1year
 
 
   # ── Run the monitor ────────────────────────────────────────────────
@@ -128,7 +128,7 @@ jobs:
             -e MLFLOW_TRACKING_URI \
             -v "${{ github.workspace }}/data:/app/data" \
             ${{ env.IMAGE }} \
-            scripts.monitor
+            scripts.monitor \
             --fetch \
             --recent-year "${{ github.event.inputs.recent_year || '1985' }}" \
             --reference-glob 'data/reference/*.nc' \
