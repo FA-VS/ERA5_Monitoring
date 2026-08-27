@@ -50,9 +50,12 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ── Tests ──────────────────────────────────────────────────────────
-  era5download:
+  era5tests:
     needs: build
     if: needs.build.result == 'success'
+    strategy:
+      matrix:
+        module: [tests.download_era5_1year, tests.run_linear_regression]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -82,7 +85,7 @@ jobs:
           -e CDSAPI_URL -e CDSAPI_KEY \
           -v "${{ github.workspace }}/data:/app/data" \
           ${{ env.IMAGE }} \
-          scripts.download_era5_1year
+          ${{ matrix.module }}
 
 
   # ── Run the monitor ────────────────────────────────────────────────

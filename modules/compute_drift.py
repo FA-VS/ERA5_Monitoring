@@ -89,7 +89,7 @@ def lag1_autocorr(da: xr.Dataset) -> np.ndarray:
     return num / den                               # per-gridpoint lag-1 AC
 
 def compute_drift(reference_files: list[str], recent_files: list[str], short: str ="msl") -> dict[str,float|np.ndarray]:
-    """Frozen reference model vs freshly-refit recent model, on recent days.
+    """Compare model derived from reference/frozen data to model derived from recent data, applied on recent data.
 
     Args:
         reference_files: list of paths to reference ERA5 files
