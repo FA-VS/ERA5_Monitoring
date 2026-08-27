@@ -17,11 +17,13 @@ jobs:
   monitor:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write           # Needed for AWS??
+      id-token: write           # Needed to create AWS token
       contents: read
-      packages: read             # needed to pull from GHCR
+      packages: read            # needed to pull from GHCR
     steps:
-      - uses: ./.github/actions/setup-env # Pulls docker image, git code, AWS credentials
+      - uses: actions/checkout@v4 # puts repo files on the runner (including reference cds data), to be mounted
+      - uses: ./.github/actions/setup-env # Pulls docker image, loads AWS credentials
+
 
       - name: Run drift monitor
         env:
