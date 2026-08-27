@@ -7,4 +7,5 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 RUN ls
-ENTRYPOINT ["python", "-m", "scripts.monitor"]
+ENTRYPOINT ["python", "-m"]
+CMD ["scripts.monitor"]
