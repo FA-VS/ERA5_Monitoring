@@ -24,5 +24,5 @@ runs:
 
     - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
       with:
-        role-to-assume: ${{ inputs.github-token }}
+        role-to-assume: ${{ inputs.role-to-assume }}
         aws-region: eu-north-1
