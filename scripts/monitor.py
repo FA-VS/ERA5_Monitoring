@@ -38,7 +38,7 @@ def main(): #pylint: disable=missing-function-docstring
             "timestamps": args.timestamp_label,
             "model": "gradient_3x3"}
 
-    _, alert = monitoring_run(ref, recent, run_name, params, args.drift_threshold)
+    _, alert = monitoring_run(ref, recent, run_name, params, args.drift_threshold) # monitoring_run saves results via mlflow
     sys.exit(1 if alert else 0) # Non-zero exit raises an error
 
 

@@ -100,7 +100,7 @@ def fetch_recent_year(
 
     os.makedirs(out_dir, exist_ok=True)
 
-    target = f"{out_dir}/recent_{year}.nc"
+    target = f"{out_dir}/era5_{area_label}_{grid_label}_{timestamp_label}_{year}.nc"
 
     cdsapi.Client().retrieve(
         DATASET,
