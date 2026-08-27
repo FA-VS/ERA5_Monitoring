@@ -13,7 +13,7 @@ def main(): #pylint: disable=missing-function-docstring
 
     exp_id = ensure_experiment(MLFLOW_EXP_NAME, MLFLOW_ARTIFACT_URI)
 
-    with mlflow.start_run(experiment_id = exp_id, run_name = run_name):
+    with mlflow.start_run(experiment_id = exp_id, run_name = "github_test"):
         print("artifact_uri:", mlflow.get_artifact_uri()) # TEST
 
         mlflow.log_param("input1", 1)

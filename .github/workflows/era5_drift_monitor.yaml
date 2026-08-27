@@ -52,8 +52,9 @@ jobs:
   # ── Tests ──────────────────────────────────────────────────────────
   era5tests:
     needs: build
-    if: always() && (needs.build.result == 'success')
+    if: needs.build.result == 'success'
     strategy:
+      fail-fast: false # if one tests fails, the others still try to complete
       matrix:
         module: [tests.download_era5_1year, tests.run_linear_regression, tests.mlflow_read_write]
     runs-on: ubuntu-latest
