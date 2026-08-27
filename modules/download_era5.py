@@ -18,7 +18,7 @@ from datetime import date, timedelta
 import cdsapi
 c = cdsapi.Client()
 
-DATA_DIR = Path(__file__).parent[1] / "data"
+DATA_DIR = Path(__file__).parents[1] / "data"
 
 # GLOBAL VARIABLES
 

@@ -2,7 +2,7 @@
 
 import os
 import tempfile
-from importlib.resources import path
+from importlib.resources import files, as_file
 
 import mlflow
 
@@ -24,7 +24,7 @@ def main(): #pylint: disable=missing-function-docstring
 
         mlflow.log_param("input1", 1)
         mlflow.log_metric("output1", 1)
-        with as_file(path("tests","array_example.npy").stat()) as path:
+        with as_file(files("tests").joinpath("array_example.npy")) as path:
             mlflow.log_artifact(path)
         print("Upload complete")
 
