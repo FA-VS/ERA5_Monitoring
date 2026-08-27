@@ -4,6 +4,8 @@ Simple tool to model atmospheric data around Europe, based on ERA5 data (using M
 
 Based on the paper by Haokun Zhou (arXiv:2511.19638, 2025), we model the daily evolution of MSLP with a linear regression on the pressure and its zonal and meridional gradients. The regression is "trained" on historic data, and its performance on recent data is compared based on the slice of data used for training (e.g. 1950s vs 2000s, applied on 2020s data), to see the drift in the "persistence" of pressure.
 
+WIP: The MLflow database and artifact registry are currently private, so the outputs are not visible. I intend to make them public (read-only) in due time.
+
 # Components
 
 - Linear regressions and array management with numpy (TODO: use sklearn for more advanced analysis).
@@ -23,3 +25,11 @@ To handle authentications more conveniently, all of the workflow is run via gith
 
 The workflow will first build a new Docker image if the repository changed. It uses a slim Python 3.11 installation, installs git and the pip requirements, and saves the files in data/reference, then pushes the resulting image to Github's registry.
 Then, it will authenticate with AWS and CDS, download the CDS data for the recent year, train the regression on the existing reference data, and evaluate it on the recent year. MLflow will automatically save the results in the database.
+
+# Results
+
+See the notebooks folder for an example on how to examine the results. As written, they require that you have setup the right environment variables (namely access to the both database and artifact registry) before you can run it.
+![Daily pressure front evolution over Western Europe](https://github.com/FA-VS/ERA5_Monitoring/tree/main/images/PressureMovement.png)
+![Pressure model drift from the 80s to 2025](https://github.com/FA-VS/ERA5_Monitoring/tree/main/images/PressureModelDrift.png)
+
+Note that I am not a meteorologist, and that the analysis remains very superficial (just a linear regression)! Take the outputs from this analysis with a very large dose of skepticism.
