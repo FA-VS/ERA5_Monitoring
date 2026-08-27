@@ -1,6 +1,7 @@
 """Upload a metric and an artifact via MLflow, then read/download them."""
 
 from importlib.resources import files, as_file
+import mlflow
 
 from modules.mlflow_monitoring import ensure_experiment
 

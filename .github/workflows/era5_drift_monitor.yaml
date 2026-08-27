@@ -52,7 +52,7 @@ jobs:
   # ── Tests ──────────────────────────────────────────────────────────
   era5tests:
     needs: build
-    if: needs.build.result == 'success'
+    if: always() && (needs.build.result == 'success')
     strategy:
       matrix:
         module: [tests.download_era5_1year, tests.run_linear_regression, tests.mlflow_read_write]
