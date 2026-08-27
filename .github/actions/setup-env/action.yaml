@@ -1,5 +1,10 @@
 name: Setup ERA5 monitoring environment / image
 description: Pulls docker image and sets up AWS credentials
+inputs:
+  role-to-assume:
+    required: true
+  github-token:
+    required: true
 runs:
   using: composite
   steps:
@@ -11,7 +16,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github-token }}
 
     - name: Pull image
       run: docker pull ${{ env.IMAGE }}
@@ -19,5 +24,5 @@ runs:
 
     - uses: aws-actions/configure-aws-credentials@v4 # Will set all the AWS envvars
       with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        role-to-assume: ${{ inputs.github-token }}
         aws-region: eu-north-1

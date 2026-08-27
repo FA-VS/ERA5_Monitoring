@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:                       # rebuild only when code or reference data changes
       - '**.py'
-      - 'data/reference/*.npy'
+      - '.github/actions/*.yaml'
       - '.github/workflows/*.yaml'
       - 'requirements.txt'
       - 'dockerfile'
+  workflow_dispatch:             # manual trigger (if needed)
+
 
 jobs:
   # ── Build & push the image, but only on code/data changes ──────────
@@ -53,6 +55,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # puts repo files on the runner (including reference cds data), to be mounted
       - uses: ./.github/actions/setup-env # Pulls docker image, loads AWS credentials
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run test
         env:

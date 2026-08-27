@@ -23,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # puts repo files on the runner (including reference cds data), to be mounted
       - uses: ./.github/actions/setup-env # Pulls docker image, loads AWS credentials
-
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run drift monitor
         env:
