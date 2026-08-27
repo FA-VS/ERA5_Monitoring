@@ -17,4 +17,7 @@ def main():
     rmse = eval_gradient(coeffs, dataset)
     autocorr = lag1_autocorr(dataset)
 
-    return float(np.nanmean(rmse_frozen)), float(np.nanmean(autocorr))
+    rmse_mean = float(np.nanmean(rmse_frozen))
+    autocorr_mean = float(np.nanmean(autocorr))
+    print(rmse_mean, autocorr_mean)
+    return rmse_mean, autocorr_mean
