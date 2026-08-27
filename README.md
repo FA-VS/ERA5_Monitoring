@@ -29,7 +29,7 @@ Then, it will authenticate with AWS and CDS, download the CDS data for the recen
 # Results
 
 See the notebooks folder for an example on how to examine the results. As written, they require that you have setup the right environment variables (namely access to the both database and artifact registry) before you can run it.
-![Daily pressure front evolution over Western Europe](https://github.com/FA-VS/ERA5_Monitoring/tree/main/images/PressureMovement.png)
-![Pressure model drift from the 80s to 2025](https://github.com/FA-VS/ERA5_Monitoring/tree/main/images/PressureModelDrift.png)
+![Daily pressure front evolution over Western Europe](images/PressureMovement.png)
+![Pressure model drift from the 80s to 2025](images/PressureModelDrift.png)
 
 Note that I am not a meteorologist, and that the analysis remains very superficial (just a linear regression)! Take the outputs from this analysis with a very large dose of skepticism.
