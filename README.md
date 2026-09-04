@@ -1,3 +1,5 @@
+![CI](https://github.com/FA-VS/ERA5_Monitoring/actions/workflows/build.yaml/badge.svg)
+
 # Introduction
 
 Simple tool to model atmospheric data around Europe, based on ERA5 data (using Mean Sea-Level Pressure and Temperature 2m above ground).
