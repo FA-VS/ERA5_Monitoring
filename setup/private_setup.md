@@ -26,6 +26,11 @@ export AWS_DEFAULT_REGION="your-region"
 ```
 This includes the public+secret key IN PLAIN TEXT of your AWS S3 account, so make sure to chmod 600 the file, to limit the damage...
 
+Note: The mlflow version isn't pinned. If you keep it unpinned, new builds will install newer versions, which are incompatible with the existing Neon database, which needs to be migrated via (make sure no database access is scheduled during the upgrade!):
+```
+mlflow db upgrade "$MLFLOW_TRACKING_URI"
+```
+It is recommended to create a new branch (i.e. backup) of the Neon database before doing so, in case there are issues with the migration.
 
 
 # S3 bucket permissions
