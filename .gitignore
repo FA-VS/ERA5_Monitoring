@@ -1,1 +1,5 @@
 *.nc
+*.db
+__pycache__/
+.ipynb_checkpoints/
+notebooks/downloaded_artifacts/
