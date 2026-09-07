@@ -10,3 +10,4 @@ dask>=2026.6
 psycopg2-binary
 boto3
 pytest>=8.0
+pytest-check>=2.9

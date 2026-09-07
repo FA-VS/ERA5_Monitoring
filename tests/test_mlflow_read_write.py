@@ -6,6 +6,7 @@ from pathlib import Path
 
 import mlflow
 import pytest
+import pytest_check as check
 
 from modules.mlflow_monitoring import ensure_experiment
 
@@ -18,9 +19,12 @@ pytestmark = pytest.mark.integration
 
 def test_mlflow_log_and_fetch():
     exp_id = ensure_experiment(MLFLOW_EXP_NAME, MLFLOW_ARTIFACT_URI)
+    print("experiment id:", exp_id)
 
     with mlflow.start_run(experiment_id=exp_id, run_name="github_test") as run:
         run_id = run.info.run_id
+        print("run_id:", run_id)
+        print("artifact_uri:", mlflow.get_artifact_uri())
         mlflow.log_param("input1", 1)
         mlflow.log_metric("output1", 1)
         mlflow.log_artifact(str(ARRAY_EXAMPLE))
@@ -28,11 +32,14 @@ def test_mlflow_log_and_fetch():
     try:
         client = mlflow.MlflowClient()
         fetched = client.get_run(run_id)
-        assert fetched.data.params["input1"] == "1"
-        assert fetched.data.metrics["output1"] == 1.0
+        print("params:", fetched.data.params)
+        print("metrics:", fetched.data.metrics)
+        check.equal(fetched.data.params.get("input1"), "1")
+        check.equal(fetched.data.metrics.get("output1"), 1.0)
 
-        artifact_paths = {f.path for f in client.list_artifacts(run_id)}
-        assert "array_example.npy" in artifact_paths
+        artifacts = list(client.list_artifacts(run_id))
+        print("artifacts:", [(f.path, f.is_dir, f.file_size) for f in artifacts])
+        check.is_in("array_example.npy", [f.path for f in artifacts])
 
         with tempfile.TemporaryDirectory() as dst:
             local = mlflow.artifacts.download_artifacts(
@@ -40,6 +47,7 @@ def test_mlflow_log_and_fetch():
                 artifact_path="array_example.npy",
                 dst_path=dst,
             )
-            assert os.path.exists(local)
+            print("downloaded to:", local)
+            check.is_true(os.path.exists(local), f"{local} does not exist")
     finally:
         mlflow.delete_run(run_id)  # best-effort; MLflow doesn't guarantee immediate deletion

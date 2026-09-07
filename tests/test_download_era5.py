@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import pytest_check as check
 import xarray as xr
 
 from modules.download_era5 import fetch_recent_year
@@ -18,13 +19,19 @@ def test_fetch_recent_year(tmp_path):
         grid_label="1deg",
         timestamp_label="6h",
     )
+    print("downloaded paths:", paths)
 
-    assert len(paths) == 1
+    check.equal(len(paths), 1)
+    if not paths:
+        return
+
     path = Path(paths[0])
-    assert path.exists()
-    assert path.stat().st_size > 0
+    check.is_true(path.exists(), f"{path} does not exist")
+    check.greater(path.stat().st_size, 0, f"{path} is empty")
 
     with xr.open_dataset(path, engine="h5netcdf") as ds:
-        assert "msl" in ds
-        assert "t2m" in ds
-        assert ds.sizes["valid_time"] > 0
+        print("variables:", list(ds.data_vars))
+        print("valid_time size:", ds.sizes.get("valid_time"))
+        check.is_in("msl", ds.data_vars)
+        check.is_in("t2m", ds.data_vars)
+        check.greater(ds.sizes.get("valid_time", 0), 0)

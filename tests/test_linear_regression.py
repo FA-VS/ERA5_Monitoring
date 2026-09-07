@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+import pytest_check as check
 
 from modules.download_era5 import DATA_DIR
 from modules.compute_drift import _daily, fit_gradient, eval_gradient, lag1_autocorr
@@ -19,7 +20,8 @@ def test_fit_and_eval_gradient():
 
     rmse_mean = float(np.nanmean(rmse))
     autocorr_mean = float(np.nanmean(autocorr))
+    print("rmse_mean:", rmse_mean, "autocorr_mean:", autocorr_mean)
 
-    assert rmse_mean >= 0
-    assert not np.isnan(rmse_mean)
-    assert -1.0 <= autocorr_mean <= 1.0
+    check.greater_equal(rmse_mean, 0)
+    check.is_not_nan(rmse_mean)
+    check.between_equal(autocorr_mean, -1.0, 1.0)
