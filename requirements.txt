@@ -9,3 +9,4 @@ h5py>=3.16
 dask>=2026.6
 psycopg2-binary
 boto3
+pytest>=8.0

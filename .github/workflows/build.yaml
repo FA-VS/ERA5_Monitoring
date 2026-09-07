@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false # if one tests fails, the others still try to complete
       matrix:
-        module: [tests.download_era5_1year, tests.run_linear_regression, tests.mlflow_read_write]
+        test_file: [tests/test_download_era5.py, tests/test_linear_regression.py, tests/test_mlflow_read_write.py]
     runs-on: ubuntu-latest
     permissions:
       id-token: write           # Needed to create AWS token
@@ -85,4 +85,4 @@ jobs:
           -e MLFLOW_TRACKING_URI \
           -v "${{ github.workspace }}/data:/app/data" \
           ${{ env.IMAGE }} \
-          ${{ matrix.module }}
+          pytest ${{ matrix.test_file }} -v
