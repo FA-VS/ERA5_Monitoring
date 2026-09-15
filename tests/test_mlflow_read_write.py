@@ -1,0 +1,53 @@
+"""Integration test: log a metric and an artifact via MLflow, then read them back."""
+
+import os
+import tempfile
+from pathlib import Path
+
+import mlflow
+import pytest
+import pytest_check as check
+
+from modules.mlflow_monitoring import ensure_experiment
+
+MLFLOW_EXP_NAME = "era5_drift_monitor_tests"
+MLFLOW_ARTIFACT_URI = "s3://eu-noth-1-an-fa-vs-era5-monitor/mlflow-tests"
+ARRAY_EXAMPLE = Path(__file__).parent / "array_example.npy"
+
+pytestmark = pytest.mark.integration
+
+
+def test_mlflow_log_and_fetch():
+    exp_id = ensure_experiment(MLFLOW_EXP_NAME, MLFLOW_ARTIFACT_URI)
+    print("experiment id:", exp_id)
+
+    with mlflow.start_run(experiment_id=exp_id, run_name="github_test") as run:
+        run_id = run.info.run_id
+        print("run_id:", run_id)
+        print("artifact_uri:", mlflow.get_artifact_uri())
+        mlflow.log_param("input1", 1)
+        mlflow.log_metric("output1", 1)
+        mlflow.log_artifact(str(ARRAY_EXAMPLE))
+
+    try:
+        client = mlflow.MlflowClient()
+        fetched = client.get_run(run_id)
+        print("params:", fetched.data.params)
+        print("metrics:", fetched.data.metrics)
+        check.equal(fetched.data.params.get("input1"), "1")
+        check.equal(fetched.data.metrics.get("output1"), 1.0)
+
+        artifacts = list(client.list_artifacts(run_id))
+        print("artifacts:", [(f.path, f.is_dir, f.file_size) for f in artifacts])
+        check.is_in("array_example.npy", [f.path for f in artifacts])
+
+        with tempfile.TemporaryDirectory() as dst:
+            local = mlflow.artifacts.download_artifacts(
+                run_id=run_id,
+                artifact_path="array_example.npy",
+                dst_path=dst,
+            )
+            print("downloaded to:", local)
+            check.is_true(os.path.exists(local), f"{local} does not exist")
+    finally:
+        mlflow.delete_run(run_id)  # best-effort; MLflow doesn't guarantee immediate deletion
